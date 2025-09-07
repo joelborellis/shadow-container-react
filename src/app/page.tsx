@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { marked } from "marked";
 import Image from "next/image";
 
 interface Message {
@@ -269,7 +270,124 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <>
+      <style>{`
+        .shadow-markdown {
+          font-size: 1.05rem;
+          line-height: 1.7;
+          color: #334155;
+          word-break: break-word;
+        }
+        .dark .shadow-markdown {
+          color: #e0e7ef;
+        }
+        .shadow-markdown h1, .shadow-markdown h2, .shadow-markdown h3, .shadow-markdown h4, .shadow-markdown h5, .shadow-markdown h6 {
+          margin-top: 1.2em;
+          margin-bottom: 0.5em;
+          font-weight: 700;
+          line-height: 1.2;
+        }
+        .shadow-markdown h1 {
+          font-size: 2.1rem;
+        }
+        .shadow-markdown h2 {
+          font-size: 1.5rem;
+        }
+        .shadow-markdown h3 {
+          font-size: 1.15rem;
+        }
+        .shadow-markdown p {
+          margin: 0.7em 0;
+        }
+        .shadow-markdown ul, .shadow-markdown ol {
+          margin: 0.7em 0 0.7em 2em;
+          padding: 0;
+        }
+        .shadow-markdown li {
+          margin-bottom: 0.3em;
+        }
+        .shadow-markdown strong {
+          font-weight: 600;
+        }
+        .shadow-markdown pre, .shadow-markdown code {
+          font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+        }
+        .shadow-markdown pre {
+          background: #f1f5f9;
+          color: #334155;
+          border-radius: 0.5em;
+          padding: 1em;
+          overflow-x: auto;
+          margin-bottom: 1.2em;
+        }
+        .dark .shadow-markdown pre {
+          background: #1e293b;
+          color: #e0e7ef;
+        }
+        .shadow-markdown code {
+          background: #e2e8f0;
+          color: #334155;
+          border-radius: 0.3em;
+          padding: 0.2em 0.4em;
+          font-size: 0.97em;
+        }
+        .dark .shadow-markdown code {
+          background: #334155;
+          color: #e0e7ef;
+        }
+        .shadow-markdown table {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 1.2em 0;
+        }
+        .shadow-markdown th, .shadow-markdown td {
+          border: 1px solid #cbd5e1;
+          padding: 0.5em 0.8em;
+        }
+        .shadow-markdown th {
+          background: #f1f5f9;
+          font-weight: 600;
+        }
+        .dark .shadow-markdown th {
+          background: #1e293b;
+        }
+        .shadow-markdown tr:nth-child(even) td {
+          background: #f8fafc;
+        }
+        .dark .shadow-markdown tr:nth-child(even) td {
+          background: #273549;
+        }
+        .shadow-markdown blockquote {
+          border-left: 4px solid #60a5fa;
+          background: #f1f5f9;
+          color: #334155;
+          padding: 0.7em 1em;
+          margin: 1em 0;
+          border-radius: 0.3em;
+        }
+        .dark .shadow-markdown blockquote {
+          background: #1e293b;
+          color: #e0e7ef;
+        }
+        .shadow-markdown hr {
+          border: none;
+          border-top: 1px solid #cbd5e1;
+          margin: 2em 0;
+        }
+        .shadow-markdown body {
+          margin: 0;
+        }
+        .shadow-markdown {
+          /* Remove extra spaces from html body */
+        }
+        .shadow-markdown > *:first-child {
+          margin-top: 0;
+        }
+        .shadow-markdown > *:last-child {
+          margin-bottom: 0;
+        }
+      `}</style>
+      <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Header */}
       <header className="border-b border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4">
@@ -321,7 +439,7 @@ export default function ChatInterface() {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto" ref={containerRef}>
-        <div className="max-w-4xl mx-auto px-4 py-6">
+  <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="space-y-6">
             {messages.map((message) => (
               <div
@@ -397,15 +515,22 @@ export default function ChatInterface() {
                     <div className="text-sm leading-relaxed">
                       {message.type === 'assistant' ? (
                         <div
-                          className="whitespace-pre-wrap"
+                          className="shadow-markdown prose prose-slate dark:prose-invert max-w-none text-[1rem]"
                           dangerouslySetInnerHTML={{
-                            __html: message.content
-                              .replace(/^```html\s*/i, '')
-                              .replace(/```\s*$/i, '')
+                            __html: (() => {
+                              let html = message.content.trim();
+                              if (html.startsWith('```html')) {
+                                html = html.replace(/^```html\s*/, '');
+                              }
+                              if (html.endsWith('```')) {
+                                html = html.replace(/```\s*$/, '');
+                              }
+                              return html.trim();
+                            })()
                           }}
                         />
                       ) : (
-                        <div className="whitespace-pre-wrap">{message.content}</div>
+                        <div className="whitespace-pre-wrap text-[1rem]">{message.content}</div>
                       )}
                       {message.isStreaming && (
                         <div className="flex items-center gap-2 mt-3 p-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-lg">
@@ -442,42 +567,19 @@ export default function ChatInterface() {
 
                   {/* Show animation even if no content yet but is streaming */}
                   {!message.content && message.isStreaming && (
-                    <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-lg">
-                      {/* Animated Sales Pipeline */}
-                      <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-                        <div className="w-8 h-0.5 bg-gradient-to-r from-blue-400 to-green-400 animate-pulse"></div>
-                        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                        <div className="w-8 h-0.5 bg-gradient-to-r from-green-400 to-emerald-500 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                        <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-                      </div>
-                      
-                      {/* Bouncing Sales Icon */}
+                    <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-lg">
+                      {/* Single Animated Dot */}
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                      {/* Bouncing Sales Icon (smaller) */}
                       <div className="text-emerald-600 dark:text-emerald-400 animate-bounce">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                           <path d="M16,17V19H2V17S2,13 9,13 16,17 16,17M12.5,7.5A3.5,3.5 0 0,0 9,11A3.5,3.5 0 0,0 12.5,14.5A3.5,3.5 0 0,0 16,11A3.5,3.5 0 0,0 12.5,7.5M15.94,13A5.32,5.32 0 0,1 18,17V19A2,2 0 0,1 16,21H2A2,2 0 0,1 0,19V17C0,13.9 3.1,13 9,13C11.43,13 13.4,13.35 14.78,13.78L22,6.5L20.5,5L15.94,13Z"/>
                         </svg>
                       </div>
-                      
-                      {/* Pulsing Text */}
-                      <span className="text-sm text-slate-600 dark:text-slate-400 font-medium animate-pulse">
+                      {/* Pulsing Text (smaller) */}
+                      <span className="text-xs text-slate-600 dark:text-slate-400 font-medium animate-pulse">
                         Processing sales insights...
                       </span>
-                      
-                      {/* Growing Chart Bars */}
-                      <div className="flex items-end gap-1">
-                        {[1, 2, 3, 4].map((bar, index) => (
-                          <div
-                            key={bar}
-                            className={`w-1.5 bg-gradient-to-t from-blue-500 to-emerald-500 rounded-t animate-pulse`}
-                            style={{ 
-                              height: `${12 + index * 4}px`,
-                              animationDelay: `${index * 0.2}s`,
-                              animationDuration: '1.5s'
-                            }}
-                          ></div>
-                        ))}
-                      </div>
                     </div>
                   )}                  
                   {/* Timestamp and Response Time */}
@@ -524,7 +626,7 @@ export default function ChatInterface() {
       </div>      
       {/* Input Area */}
       <div className="border-t border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+  <div className="max-w-6xl mx-auto px-4 py-4">
           {/* Collapsible Configuration Section */}
           <div className="mb-4">
             {/* Configuration Toggle Button */}
@@ -630,67 +732,8 @@ export default function ChatInterface() {
                     />
                   </div>
 
-                  <div className="flex flex-col">
-                    <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      Account ID
-                    </label>
-                    <input
-                      type="text"
-                      value={accountId}
-                      onChange={(e) => setAccountId(e.target.value)}
-                      placeholder="Account ID..."
-                      maxLength={100}
-                      className="px-3 py-2 text-sm bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent w-48"
-                    />
-                  </div>
-
-                  <div className="flex flex-col">
-                    <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      Client ID
-                    </label>
-                    <input
-                      type="text"
-                      value={clientId}
-                      onChange={(e) => setClientId(e.target.value)}
-                      placeholder="Client ID..."
-                      maxLength={100}
-                      className="px-3 py-2 text-sm bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent w-48"
-                    />
-                  </div>                  
-                  <div className="flex flex-col">
-                    <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
-                      Pursuit ID
-                    </label>
-                    <input
-                      type="text"
-                      value={pursuitId}
-                      onChange={(e) => setPursuitId(e.target.value)}
-                      placeholder="Pursuit ID..."
-                      maxLength={100}
-                      className="px-3 py-2 text-sm bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent w-48"
-                    />
-                  </div>
                 </div>
 
-                {/* Additional Instructions Field */}
-                <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <div className="flex flex-col">
-                    <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
-                      Additional Instructions (Optional)
-                    </label>
-                    <textarea
-                      value={additionalInstructions}
-                      onChange={(e) => setAdditionalInstructions(e.target.value)}
-                      placeholder="Any additional context or specific instructions for the AI assistant..."
-                      maxLength={500}
-                      rows={2}
-                      className="px-3 py-2 text-sm bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent resize-none"
-                    />
-                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                      {additionalInstructions.length}/500 characters
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
           </div>
@@ -758,6 +801,7 @@ export default function ChatInterface() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
