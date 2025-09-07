@@ -1,0 +1,13 @@
+npm run build
+
+# Build the image
+docker build -t shadow-react .
+
+# Run it
+docker run -p 3000:3000 shadow-react
+
+docker tag shadow-react gtlcr.azurecr.io/shadow-react:latest
+
+az acr login --name gtlcr
+
+docker push gtlcr.azurecr.io/shadow-react:latest
