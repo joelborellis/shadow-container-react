@@ -395,7 +395,18 @@ export default function ChatInterface() {
                   {/* Message Content */}
                   {message.content && (
                     <div className="text-sm leading-relaxed">
-                      <div className="whitespace-pre-wrap">{message.content}</div>
+                      {message.type === 'assistant' ? (
+                        <div
+                          className="whitespace-pre-wrap"
+                          dangerouslySetInnerHTML={{
+                            __html: message.content
+                              .replace(/^```html\s*/i, '')
+                              .replace(/```\s*$/i, '')
+                          }}
+                        />
+                      ) : (
+                        <div className="whitespace-pre-wrap">{message.content}</div>
+                      )}
                       {message.isStreaming && (
                         <div className="flex items-center gap-2 mt-3 p-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-700 dark:to-slate-600 rounded-lg">
                           {/* Sales Chart Animation */}
