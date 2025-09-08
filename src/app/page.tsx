@@ -132,8 +132,8 @@ export default function ChatInterface() {
       };
 
       // Call the backend API with SSE
-      const response = await fetch('http://localhost:8000/shadow-sk', {
-      //const response = await fetch('https://shadow-container-app.nicebeach-c4679607.eastus.azurecontainerapps.io/shadow-sk', {
+      //const response = await fetch('http://localhost:8000/shadow-sk', {
+      const response = await fetch('https://shadow-container-app.nicebeach-c4679607.eastus.azurecontainerapps.io/shadow-sk', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -717,19 +717,20 @@ export default function ChatInterface() {
                       className="px-3 py-2 text-sm bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent w-48"
                     />
                   </div>
-                    
-                  <div className="flex flex-col">
+                      <div className="flex flex-col">
                     <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                       Client Name
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
-                      placeholder="Client name..."
-                      maxLength={50}
-                      className="px-3 py-2 text-sm bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-slate-200 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent w-48"
-                    />
+                      className="px-3 py-2 text-sm bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent w-48"
+                    >
+                      <option value="">Select client...</option>
+                      <option value="OptisourceSolutions">OptisourceSolutions</option>
+                      <option value="The Transformation Guild">The Transformation Guild</option>
+                      <option value="Growth Orbit">Growth Orbit</option>
+                    </select>
                   </div>
 
                 </div>
