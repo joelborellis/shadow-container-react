@@ -132,8 +132,8 @@ export default function ChatInterface() {
       };
 
       // Call the backend API with SSE
-      const response = await fetch('http://localhost:8000/shadow-sk', {
-      //const response = await fetch('https://shadow-container-app.nicebeach-c4679607.eastus.azurecontainerapps.io/shadow-sk', {
+      //const response = await fetch('http://localhost:8000/shadow-sk', {
+      const response = await fetch('https://shadow-container-app.nicebeach-c4679607.eastus.azurecontainerapps.io/shadow-sk', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
